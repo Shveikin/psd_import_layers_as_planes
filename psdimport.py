@@ -75,8 +75,8 @@ class OBJECT_OT_add_object(Operator, ImportHelper):
 
             # print(layer.left, layer.width)
             # print("\t", layer.height)
-
-            layer.composite().save(dir + '\\' + layer.name + '.png')
+            imageName = dir + '\\' + layer.name + '.png'
+            layer.composite().save(imageName)
 
 
         # 
