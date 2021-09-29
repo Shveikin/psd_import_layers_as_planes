@@ -61,7 +61,7 @@ class OBJECT_OT_add_object(Operator, ImportHelper):
 
 
     def execute(self, context):
-        dir = (os.path.dirname(self.filepath) if bpy.path.abspath("//")=='' else bpy.path.abspath("//")) + os.path.basename(self.filepath)
+        dir = (os.path.dirname(self.filepath) if bpy.path.abspath("//")=='' else bpy.path.abspath("//")) + "_" + os.path.basename(self.filepath)
         if (not os.path.isdir(dir)):
             os.mkdir(dir, 0o666)
 
