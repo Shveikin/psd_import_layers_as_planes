@@ -42,6 +42,9 @@ def add_object(self, context):
     object_data_add(context, mesh, operator=self)
 
 
+
+
+
 class OBJECT_OT_add_object(Operator, ImportHelper):
     """Create a new Mesh Object"""
     bl_idname = "mesh.psd_import_as_planes"
@@ -52,45 +55,69 @@ class OBJECT_OT_add_object(Operator, ImportHelper):
         default='*.psd',
         options={'HIDDEN'}
     )
+
+    prefix: bpy.props.StringProperty(
+        name='Object name prefix',
+        description='Префикс',
+        default='',
+    )
     
-    some_boolean: bpy.props.BoolProperty(
-        name='emission material',
+    emission: bpy.props.BoolProperty(
+        name='Emission material',
         description='Texture',
         default=True,
     )
 
+    scale: bpy.props.FloatProperty(
+        name='Scale',
+        description='Масштаб',
+        default=0.5,
+        min=0.1,
+        soft_max=1,
+        subtype='FACTOR'
+    )
+
+    margin: bpy.props.FloatProperty(
+        name='Margin',
+        description='Отступ между слоями',
+        default=0.2,
+        min=0,
+        soft_max=1,
+        subtype='FACTOR'
+    )
+
+    def waiting(self, show):
+        print('wait...')
 
     def execute(self, context):
         dir = (os.path.dirname(self.filepath) if bpy.path.abspath("//")=='' else bpy.path.abspath("//")) + "_" + os.path.basename(self.filepath)
         if (not os.path.isdir(dir)):
             os.mkdir(dir, 0o666)
 
-
         psd = PSDImage.open(self.filepath)
+        self.waiting(True)
 
+        level = 0
         for layer in psd:
-            # print('id - name',layer.layer_id, layer.name)
-
-            # print("\t", layer.top)
-
-            # print(layer.left, layer.width)
-            # print("\t", layer.height)
             imageName = dir + '\\' + layer.name + '.png'
             layer.composite().save(imageName)
+            
+            bpy.ops.object.importimagespackscenepsd(
+                name = self.prefix + '_' + layer.name,
+                file_name = os.path.basename(self.filepath),
+                path = imageName,
+                x = (layer.left *2) * self.scale,
+                y = (layer.top *2) * self.scale,
+                width = (layer.width) * self.scale,
+                height = (layer.height) * self.scale,
+                level = level,
+                margin = self.margin,
+                emission = False
+            )
 
-
-        # 
-
-        # # if self.some_boolean:
-        # #     PSDImage
-
-        # print('Selected file:', self.filepath)
-        # print('File name:', filename)
-        # print('File extension:', extension)
-        # print('Some Boolean:', self.some_boolean)
+            level+=1
         return {'FINISHED'}
 
-        
 
 
 # Registration
